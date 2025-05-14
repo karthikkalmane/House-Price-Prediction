@@ -1,0 +1,9 @@
+pandas
+numpy
+sklearn.model_selection
+sklearn.linear_model
+sklearn.preprocessing
+sklearn.metrics
+joblib
+flask
+gunicorn

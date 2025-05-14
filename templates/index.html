@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Arial', sans-serif;
+            transition: background-image 1s ease-in-out;
+            color: #333;
+            overflow-y: scroll;
+        }
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        .container {
+            margin-top: 50px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 50px auto;
+        }
+        .foot{
+            color: #001eff; 
+            text-align: center;
+            font: bold;
+        }
+        h2 {
+            margin-bottom: 30px;
+            color: #007bff;
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .form-group label {
+            font-weight: bold;
+            font-size: 16px;
+            color: #007bff;
+        }
+        .form-control {
+            border-radius: 10px;
+            box-shadow: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+        }
+        .icon {
+            color: #007bff;
+            font-size: 50px;
+            text-align: center;
+            display: block;
+            margin-bottom: 20px;
+        }
+        footer.containerr {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            margin-left: 175px;
+            margin-right: 175px;
+            text-align: center;
+            color: blue;
+            font: bolder;
+            font-size: 14px;
+        }
+        .select2-container--default .select2-selection--single {
+            height: calc(1.5em + 0.75rem + 2px);
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+            text-align: left;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.5em + 0.75rem + 2px);
+        }
+        .modal-content {
+            border-radius: 15px;
+        }
+        .modal-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .modal-body td {
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            width: 50%;
+        }
+        .modal-body .value {
+            text-align: center;
+            font-weight: normal;
+            width: 50%;
+        }
+        .modal-body .prediction-text {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: green; /* Prediction result in green */
+        }
+        .modal-header {
+            background-color: #001eff; /* Blue background for modal header */
+            color: white;
+            font-size: 24px; /* Larger font size for modal title */
+            font-weight: bold;
+            text-align: center; /* Center align modal header */
+            border-bottom: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .modal-title{
+            flex: 1;
+            text-align: center;
+        }
+        .modal-footer {
+            justify-content: center; /* Center align OK button */
+        }
+        .modal-footer .btn-primary{
+            width: 150px;
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            width: 80%;
+            border-collapse: collapse;
+        }
+        td {
+            text-align: center;
+            padding: 8px;
+        }
+        td:first-child {
+            text-align: right;
+            font-weight: bold;
+            width: 40%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <i class="fas fa-home icon"></i>
+        <h2>House Price Prediction</h2>
+        <form id="predictionForm" action="/predict" method="post">
+            <div class="form-group">
+                <label for="location">Location</label>
+                <select class="form-control" name="location" id="location" required>
+                    <option value="" disabled selected>Select a location</option>
+                    <!-- Locations dynamically added from Flask -->
+                    {% for location in locations %}
+                        <option value="{{ location }}">{{ location }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="total_sqft">Total Square Feet</label>
+                <input type="text" class="form-control" name="total_sqft" id="total_sqft" placeholder="Enter total square feet" required>
+            </div>
+            <div class="form-group">
+                <label for="bath">Number of Bathrooms</label>
+                <input type="text" class="form-control" name="bath" id="bath" placeholder="Enter number of bathrooms" required>
+            </div>
+            <div class="form-group">
+                <label for="balcony">Number of Balconies</label>
+                <input type="text" class="form-control" name="balcony" id="balcony" placeholder="Enter number of balconies" required>
+            </div>
+            <div class="form-group">
+                <label for="bhk">Number of Bedrooms</label>
+                <input type="text" class="form-control" name="bhk" id="bhk" placeholder="Enter number of bedrooms" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Predict</button>
+        </form>
+    </div>
+    <footer class="foot">
+            &copy; 2024 House Price Predictor. All Rights Reserved
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Prediction Result</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table>
+                        <tr><td>Location  :</td><td class="value" id="modal-location"></td></tr>
+                        <tr><td>Total Square Feet  :</td><td class="value" id="modal-total_sqft"></td></tr>
+                        <tr><td>Number of Bathrooms  :</td><td class="value" id="modal-bath"></td></tr>
+                        <tr><td>Number of Balconies  :</td><td class="value" id="modal-balcony"></td></tr>
+                        <tr><td>Number of Bedrooms  :</td><td class="value" id="modal-bhk"></td></tr>
+                    </table>
+                    <div class="prediction-text" id="modal-prediction"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="window.location.reload();">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#location').select2();
+
+            function fetchImages() {
+                var apiKey = 'btCSX-V8m7NVRjOWbbq9vOMwv8bAChHtJG023_gAltU';
+                var query = 'house exterior';
+                var url = 'https://api.unsplash.com/photos/random?query=' + query + '&count=9999';
+
+                fetch(url, {
+                    headers: {
+                        'Authorization': 'Client-ID ' + apiKey
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var images = data.map(photo => photo.urls.regular);
+                    var currentIndex = 0;
+
+                    function changeBackground() {
+                        $('body').css('background-image', 'url("' + images[currentIndex] + '")');
+                        currentIndex = (currentIndex + 1) % images.length;
+                    }
+
+                    setInterval(changeBackground, 5000); // Change background every 5 seconds
+                    changeBackground(); // Initial background load
+                })
+                .catch(error => console.error('Error fetching images:', error));
+            }
+
+            fetchImages(); // Fetch images on page load
+
+            $('#predictionForm').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "/predict",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#modal-location').text($('select[name="location"]').val());
+                        $('#modal-total_sqft').text($('input[name="total_sqft"]').val());
+                        $('#modal-bath').text($('input[name="bath"]').val());
+                        $('#modal-balcony').text($('input[name="balcony"]').val());
+                        $('#modal-bhk').text($('input[name="bhk"]').val());
+                        $('#modal-prediction').text(response.prediction);
+                        $('#resultModal').modal('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
