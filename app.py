@@ -16,7 +16,7 @@ if not isinstance(model_features, list):
     model_features = model_features.tolist()
 
 # Load the dataset to get unique locations for the form
-df = pd.read_csv('bengaluru_house_prices.csv')
+df = pd.read_csv('bengaluru_house_prices1.csv')
 locations = sorted(df['location'].dropna().unique())
 
 @app.route('/')
